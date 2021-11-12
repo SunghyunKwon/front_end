@@ -1,5 +1,6 @@
 const Router = require('koa-router');
 import * as postsCtl from './posts.ctl';
+import checkLoggedIn from '../../lib/checkLoggedIn';
 
 const posts = new Router();
 // const printInfo = ctx => {
@@ -11,9 +12,13 @@ const posts = new Router();
 // };
 
 posts.get('/', postsCtl.list);
-posts.post('/', postsCtl.write);
-posts.get('/:id', postsCtl.checkObjectId, postsCtl.read);
-posts.delete('/:id', postsCtl.checkObjectId, postsCtl.remove);
-posts.patch('/:id', postsCtl.checkObjectId, postsCtl.update);
+posts.post('/', checkLoggedIn, postsCtl.write);
+
+const post = new Router();
+post.get('/', postsCtl.read);
+post.delete('/', checkLoggedIn, postsCtl.checkOwnPost, postsCtl.remove);
+post.patch('/', checkLoggedIn, postsCtl.checkOwnPost, postsCtl.update);
+
+post.use('/:id', postsCtl.getPostById, post.routes());
 
 module.exports = posts;

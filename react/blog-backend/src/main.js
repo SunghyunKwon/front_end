@@ -5,6 +5,9 @@ const bodyParser = require('koa-bodyparser');
 const mongoose = require('mongoose');
 
 const api = require('./api');
+import jwtMiddleware from './lib/jwtMiddleware';
+
+import createFakeData from './createFakeData';
 
 const { PORT, MONGO_URI } = process.env;
 
@@ -12,6 +15,8 @@ mongoose
 .connect(MONGO_URI)
 .then(() => {
   console.log('Connect to MongoDB');
+
+  createFakeData();
 })
 .catch(e => {
   console.log(e);
@@ -31,6 +36,7 @@ router.get('/about', ctx => {
 router.use('/api', api.routes());
 
 app.use(bodyParser());
+app.use(jwtMiddleware);
 app.use(router.routes()).use(router.allowedMethods());
 
 const port = PORT || 4000;
